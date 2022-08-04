@@ -1,0 +1,312 @@
+App.js
+import './App.css';
+import { Component } from 'react';
+import axios from 'axios';//mysql,express, axios npm 방식으로 install필요
+
+
+class App extends Component {
+  constructor(props){
+    super(props)
+    this.state={
+
+    }
+  }
+
+  delete=(params)=> {
+    const toDoList = document.querySelectorAll('.toDoList')
+    toDoList.forEach(i=>{
+      console.log('delete')
+    })    
+  }
+
+  render(){
+    return(
+      <div id="listBox">
+        <span>todolist</span>
+        <div id="header">
+          <input type="text" />
+          <button>추가</button>
+        </div>
+        <div id="body">
+          <div id='listBody'>
+            <div className='toDoList'>마크업 공부</div><div className='listBtn'><button onClick={this.delete}>삭제</button></div>
+            <div className='toDoList'>스크립트 공부</div><div className='listBtn'><button onClick={this.delete}>삭제</button></div>
+            <div className='toDoList'>리액트 공부</div><div className='listBtn'><button onClick={this.delete}>삭제</button></div>
+            <div className='toDoList'>미니프로젝트</div><div className='listBtn'><button onClick={this.delete}>삭제</button></div>
+            <div className='toDoList'>포트폴리오 주제 구상</div><div className='listBtn'><button onClick={this.delete}>삭제</button></div>
+          </div>
+        </div>
+        <div id="footer">
+          <button>할 일 추가</button>
+          <button>전체 삭제</button>
+          <button>마지막 목록 삭제</button>
+        </div>
+      </div>
+    )
+  }
+}
+
+export default App;
+
+
+App.css
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 4000;
+const db = require('./config/db.js')
+var bodyParser = require('body-parser')
+app.use(bodyParser.json())
+app.use(express.json())
+app.use(express.urlencoded({extended : false}));
+
+app.get('/',(req,res)=>{
+    console.log('root')
+})
+
+app.get('/car',(req,res)=>{
+    console.log('./car')
+    db.query(`select * from car`,(err,data)=>{
+        if(!err){
+            console.log(data)
+        }else{
+            console.log(err)
+        }
+    })
+})
+
+app.get('/car/:provider',(req,res)=>{
+    console.log('./car/:provider')
+    const provider = req.params.provider
+    console.log(provider)//3
+    db.query(`select * from car where provider='${provider}'`,(err,data)=>{
+        if(!err){
+            console.log(data)
+        }else{
+            console.log(err)
+        }
+    })
+})
+
+app.post('/car',(req,res)=>{
+    console.log('./car')
+    const carObj = req.body
+    console.log(carObj)//3
+    db.query(`insert into car(id,title) values('${carObj.model}','${carObj.provider}')`,(err,data)=>{
+        if(!err){
+            console.log(data)
+        }else{
+            console.log(err)
+        }
+    })
+})
+
+app.put('/car',(req,res)=>{
+    console.log('./car')
+    const carObj = req.body
+    console.log(carObj)//3
+    db.query(`update car set model='${carObj.model}' where price=${carObj.price}`,(err,data)=>{
+        if(!err){
+            console.log(data)
+        }else{
+            console.log(err)
+        }
+    })
+})
+
+app.delete('/car/:model',(req,res)=>{
+    console.log('./car')
+    const model = req.params.model
+    console.log(model)
+    db.query(`delete from car where model='${model}'`,(err,data)=>{
+        if(!err){
+            console.log(data)
+        }else{
+            console.log(err)
+        }
+    })
+})
+
+app.post('/car/increment',(req,res)=>{
+    console.log('./car')
+    db.query(`alter table car add column no int not null auto_increment primary key first`,(err,data)=>{
+        if(!err){
+            console.log(data)
+        }else{
+            console.log(err)
+        }
+    })
+})
+
+app.listen(PORT, () => {
+    console.log(`Server On : http://localhost:${PORT}/`);
+})
+
+
+
+App.js
+import './App.css';
+import { Component } from 'react';
+import axios from 'axios';//mysql,express, axios npm 방식으로 install필요
+
+
+class App extends Component {
+  constructor(props){
+    super(props)
+    this.state={
+
+    }
+  }
+
+  getAllCar=()=>{
+    alert('getAllCar')
+    axios.get('./car')//axios get('http://localhost:4000/car') 방식 요청   
+  } 
+
+  getCarByModel=()=>{
+    alert('getCarByModel')
+    axios.get('./car/tessla')  
+  }
+  addCarInfo=()=>{
+    alert('addCarInfo')
+    const carObj={model:'appleCar',provider:'apple',price:5000}  
+    axios.post('/car',carObj)//객체형으로 요구할 때는 params 대신 body를 붙인다 req.body.. 
+  }
+  updateCarInfo=()=>{
+    alert('updateCarInfo')  
+    const carObj={model:'appleCar',price:3500}  
+    axios.put('/car',carObj)//객체형으로 요구할 때는 params 대신 body를 붙인다 req.body.. 
+  }
+  deleteCarInfo=()=>{
+    alert('deleteCarInfo') 
+    axios.delete('/car/appleCar') 
+  }
+  addIncrementCarInfo=()=>{
+    alert('addIncrementCarInfo')
+    axios.post('./car/increment')
+  }
+  
+  likeCarInfo=()=>{
+    alert('likeCarInfo')
+    axios.get('./car/like')
+  }
+
+  render(){
+    return(
+      <div id='App'>
+        <h1>REST-API-SERVER-TEST</h1>
+        <button onClick={this.getAllCar}>|GET| /car</button>
+        <button onClick={this.getCarByModel}>|GET| /car/:model</button>
+        <button onClick={this.addCarInfo}>|POST| /car</button>
+        <button onClick={this.updateCarInfo}>|PUT| /car</button>
+        <button onClick={this.deleteCarInfo}>|DELETE| /car</button>
+        <button onClick={this.addIncrementCarInfo}>|POST| /car/increment</button>
+        <button onClick={this.likeCarInfo}>|GET| /car/like</button>
+      </div>
+    )
+  }
+}
+
+export default App;
+
+server.js
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 4000;
+const db = require('./config/db.js')
+var bodyParser = require('body-parser')
+app.use(bodyParser.json())
+app.use(express.json())
+app.use(express.urlencoded({extended : false}));
+
+app.get('/',(req,res)=>{
+    console.log('root')
+})
+
+app.get('/car',(req,res)=>{
+    console.log('./car')
+    db.query(`select * from car`,(err,data)=>{
+        if(!err){
+            console.log(data)
+        }else{
+            console.log(err)
+        }
+    })
+})
+
+app.get('/car/:provider',(req,res)=>{
+    console.log('./car/:provider')
+    const provider = req.params.provider
+    console.log(provider)//3
+    db.query(`select * from car where provider='${provider}'`,(err,data)=>{
+        if(!err){
+            console.log(data)
+        }else{
+            console.log(err)
+        }
+    })
+})
+
+app.post('/car',(req,res)=>{
+    console.log('./car')
+    const carObj = req.body
+    console.log(carObj)//3
+    db.query(`insert into car(id,title) values('${carObj.model}','${carObj.provider}')`,(err,data)=>{
+        if(!err){
+            console.log(data)
+        }else{
+            console.log(err)
+        }
+    })
+})
+
+app.put('/car',(req,res)=>{
+    console.log('./car')
+    const carObj = req.body
+    console.log(carObj)//3
+    db.query(`update car set model='${carObj.model}' where price=${carObj.price}`,(err,data)=>{
+        if(!err){
+            console.log(data)
+        }else{
+            console.log(err)
+        }
+    })
+})
+
+app.delete('/car/:model',(req,res)=>{
+    console.log('./car')
+    const model = req.params.model
+    console.log(model)
+    db.query(`delete from car where model='${model}'`,(err,data)=>{
+        if(!err){
+            console.log(data)
+        }else{
+            console.log(err)
+        }
+    })
+})
+
+app.post('/car/increment',(req,res)=>{
+    console.log('./car')
+    db.query(`alter table car add column no int not null auto_increment primary key first`,(err,data)=>{
+        if(!err){
+            console.log(data)
+        }else{
+            console.log(err)
+        }
+    })
+})
+
+app.post('/car/like',(req,res)=>{
+    console.log('./car/like')
+    db.query(`alter table car add column no int not null auto_increment primary key first`,(err,data)=>{
+        if(!err){
+            console.log(data)
+        }else{
+            console.log(err)
+        }
+    })
+})
+
+app.listen(PORT, () => {
+    console.log(`Server On : http://localhost:${PORT}/`);
+})
